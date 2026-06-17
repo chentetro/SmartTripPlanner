@@ -4,8 +4,23 @@
     android:background="#1E73E8"
     android:orientation="vertical"
     android:gravity="center"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.home.HomeFragment"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogout"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="0dp" app:icon="@drawable/outline_logout_24"
+        app:iconTint="#FFFFFF"
+        android:hint="log out"
+        />
+
     <TextView
         android:id="@+id/tvHelloUser"
         android:layout_width="wrap_content"
