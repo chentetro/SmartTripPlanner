@@ -5,8 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.example.smarttripplanner.R
 import com.example.smarttripplanner.databinding.HomeLayoutBinding
-import com.example.smarttripplanner.databinding.LoginLayoutBinding
 
 class HomeFragment : Fragment (){
 
@@ -24,6 +25,18 @@ class HomeFragment : Fragment (){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.btnCreateTrip.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_questionnaireFragment)
+        }
+
+        binding.btnMyTrips.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_tripsFragment)
+        }
+
+        binding.btnFavorites.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_favoritesFragment)
+        }
     }
 
     override fun onDestroyView() {

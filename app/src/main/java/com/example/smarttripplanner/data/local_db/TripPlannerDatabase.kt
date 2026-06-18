@@ -1,22 +1,21 @@
-package com.example.finalproject.data.local_db
+package com.example.smarttripplanner.data.local_db
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.finalproject.data.model.Trip
-import com.example.finalproject.data.model.Site
-import com.example.finalproject.data.model.TripSiteCrossRef
+import com.example.smarttripplanner.data.model.SavedSite
+import com.example.smarttripplanner.data.model.Trip
 
 @Database(
-    entities = [Trip::class, Site::class, TripSiteCrossRef::class],
-    version = 1,
+    entities = [Trip::class, SavedSite::class],
+    version = 2,
     exportSchema = false
 )
 abstract class TripPlannerDatabase : RoomDatabase() {
 
     abstract fun tripDao(): TripDao
-    abstract fun siteDao(): SiteDao
+    abstract fun savedSiteDao(): SavedSiteDao
 
     companion object {
         @Volatile
@@ -28,7 +27,10 @@ abstract class TripPlannerDatabase : RoomDatabase() {
                 TripPlannerDatabase::class.java,
                 "trip_planner_db"
             )
-                .allowMainThreadQueries().build()
+                .fallbackToDestructiveMigration()
+                .allowMainThreadQueries()
+                .build()
+                .also { instance = it }
         }
     }
 }
