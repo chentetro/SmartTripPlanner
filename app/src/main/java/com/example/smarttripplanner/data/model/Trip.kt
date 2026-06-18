@@ -1,4 +1,4 @@
-package com.example.finalproject.data.model
+package com.example.smarttripplanner.data.model
 
 
 
@@ -44,9 +44,6 @@ data class Trip(
 
     @ColumnInfo(name = "vibe")
     val vibe: String, // בשלב הבא נלמד איך להפוך את זה ל-Enum מוגבל לבחירה
-
-    @ColumnInfo(name = "budget")
-    val budget: Double, // שיניתי מ-String ל-Double כדי שתוכלי לעשות חישובים וסינונים מתמטיים באפליקציה!
 
     @ColumnInfo(name = "max_distance")
     val maxDistance: Double // שיניתי ל-Double כדי שתוכלי לחשב רדיוס מרחק אמיתי

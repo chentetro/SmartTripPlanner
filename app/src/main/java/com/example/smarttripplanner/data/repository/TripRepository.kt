@@ -1,65 +1,54 @@
-package com.example.finalproject.data.repository
+package com.example.smarttripplanner.data.repository
 
 import android.app.Application
 import androidx.lifecycle.LiveData
-import com.example.finalproject.data.local_db.TripDao
-import com.example.finalproject.data.local_db.TripPlannerDatabase
-import com.example.finalproject.data.model.Trip
-import com.example.finalproject.data.model.TripSiteCrossRef
-import com.example.finalproject.data.model.TripWithSites
+import com.example.smarttripplanner.data.local_db.TripDao
+import com.example.smarttripplanner.data.local_db.TripPlannerDatabase
+import com.example.smarttripplanner.data.model.SavedSite
+import com.example.smarttripplanner.data.model.Trip
+import com.example.smarttripplanner.data.model.TripWithSites
 
 class TripRepository(application: Application) {
 
-    // Making this non-nullable fixes the LiveData return type issues
     private val tripDao: TripDao
 
     init {
-        // שליפת מופע ה-Database וה-Dao בצורה בטוחה
         val db = TripPlannerDatabase.getDatabase(application.applicationContext)
         tripDao = db.tripDao()
     }
 
-    // שליפת כל הטיולים בזמן אמת
     fun getAllTrips(): LiveData<List<Trip>> = tripDao.getAllTrips()
 
-    // שליפת טיול ספציפי לפי ID
     fun getTripById(tripId: Long): LiveData<Trip> = tripDao.getTripById(tripId)
 
-    // שליפת כל הטיולים המועדפים
     fun getFavoriteTrips(): LiveData<List<Trip>> = tripDao.getFavoriteTrips()
 
-    // הוספת טיול חדש - חייב להיות suspend
-    suspend fun insertTrip(trip: Trip) {
-        tripDao.insertTrip(trip)
-    }
+    suspend fun insertTrip(trip: Trip): Long = tripDao.insertTrip(trip)
 
-    // מחיקת טיול - חייב להיות suspend
     suspend fun deleteTrip(trip: Trip) {
         tripDao.deleteTrip(trip)
     }
 
-    // עדכון פרטי טיול (שם, תאריך, שעות) - חייב להיות suspend
     suspend fun updateTrip(trip: Trip) {
         tripDao.updateTrip(trip)
     }
 
-    // עדכון סטטוס מועדף - חייב להיות suspend
     suspend fun updateFavoriteStatus(tripId: Long, isFavorite: Boolean) {
         tripDao.updateFavoriteStatus(tripId, isFavorite)
     }
 
+    suspend fun insertSavedSite(savedSite: SavedSite): Long = tripDao.insertSavedSite(savedSite)
 
-    // --- ניהול הלו"ז (טבלת הקשר) ---
-
-    // הוספת אתר/מסעדה לתוך מסלול הטיול - חייב להיות suspend
-    suspend fun insertSiteToTrip(crossRef: TripSiteCrossRef) {
-        tripDao.insertSiteToTrip(crossRef)
+    suspend fun updateSavedSite(savedSite: SavedSite) {
+        tripDao.updateSavedSite(savedSite)
     }
 
-    // מחיקת אתר מתוך טיול ספציפי - חייב להיות suspend
-    suspend fun removeSiteFromTrip(tripId: Long, siteId: String) {
-        tripDao.removeSiteFromTrip(tripId, siteId)
+    suspend fun deleteSavedSite(id: Long) {
+        tripDao.deleteSavedSite(id)
     }
+
+    fun getSavedSitesForTrip(tripId: Long): LiveData<List<SavedSite>> =
+        tripDao.getSavedSitesForTrip(tripId)
 
     fun getTripWithSites(tripId: Long): LiveData<TripWithSites> {
         return tripDao.getTripWithSites(tripId)

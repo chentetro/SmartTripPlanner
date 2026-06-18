@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fillViewport="true"
+    tools:context=".ui.details.SiteDetailsFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/ivDetailedSiteImage"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:contentDescription="Site image"
+            android:scaleType="centerCrop"
+            tools:src="@drawable/ic_launcher_foreground" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/tvDetailedSiteName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="Tel Aviv Museum of Art" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvDetailedSiteCategory"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textColor="#666666"
+                    android:textSize="14sp"
+                    tools:text="museums, cultural, interesting_places" />
+
+                <TextView
+                    android:id="@+id/tvDetailedSiteRating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:textColor="#666666"
+                    android:textSize="14sp"
+                    tools:text="★ 3" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvDetailedSiteDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:lineSpacingExtra="4dp"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                tools:text="The Tel Aviv Museum of Art is an art museum in Tel Aviv, Israel. It was established in 1932 in a building that was the home of Tel Aviv's first mayor, Meir Dizengoff. The museum moved to its current location on King Saul Avenue in 1971. Its collection represents some of the finest examples of modern and contemporary art from Israel and abroad." />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOpenOfficialWebsite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Visit Official Website"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="#1E73E8"
+                app:cornerRadius="0dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
