@@ -1,3 +1,56 @@
 <resources>
     <string name="app_name">SmartTripPlanner</string>
+    <string name="travel_app">TravelApp</string>
+    <string name="journey_subtitle">Your journey starts here</string>
+
+    <!-- Auth Screens -->
+    <string name="email_label">Email</string>
+    <string name="email_hint">Enter your email</string>
+    <string name="password_label">Password</string>
+    <string name="password_hint">Enter your password</string>
+    <string name="login_button">Log In</string>
+    <string name="no_account_text">Don\'t have an account? </string>
+    <string name="sign_up_link">Sign Up</string>
+
+    <string name="full_name_label">Full name</string>
+    <string name="full_name_hint">Enter your full name</string>
+    <string name="confirm_password_label">Confirm Password</string>
+    <string name="confirm_password_hint">Confirm your password</string>
+    <string name="create_account_button">Create Account</string>
+
+    <!-- Home Screen -->
+    <string name="logout_text">Log out</string>
+    <string name="hello_user">HELLO USER</string>
+    <string name="create_trip_title">LET CREATE A TRIP YOU\nWANT</string>
+    <string name="create_trip_button">Create a Trip</string>
+
+    <!-- Search Screen -->
+    <string name="explore_destinations">Explore Destinations</string>
+    <string name="find_next_adventure">Find your next adventure</string>
+    <string name="search_hint">Where to go?</string>
+    <string name="recent_searches">Recent Searches</string>
+
+    <!-- Favorites Screen -->
+    <string name="my_favorites">My Favorites</string>
+
+    <!-- Details Screen -->
+    <string name="place_details_title">Place Details</string>
+    <string name="description_label">Description</string>
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="sample_place_name">Paris, France</string>
+    <string name="sample_place_location">Europe</string>
+    <string name="sample_place_description">Discover the magic of the City of Light. From the Eiffel Tower to world-class museums, your journey will be unforgettable.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="preferences_label">Preferences</string>
+    <string name="dark_mode_label">Dark Mode</string>
+    <string name="notifications_label">Notifications</string>
+    <string name="account_label">Account</string>
+    <string name="change_password_label">Change Password</string>
+
+    <!-- Register Screen -->
+    <string name="reg_title">Register</string>
+    <string name="reg_subtitle">Register to get started</string>
+
 </resources>

@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
+    <color name="black">#FF1A1A2E</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Canva AI Pastel Palette -->
+    <color name="bg_cream">#FFF8F2</color>
+    <color name="primary_blue">#7EC8E3</color>
+    <color name="secondary_coral">#FF9A8B</color>
+    <color name="glass_white">#A6FFFFFF</color>
+    <color name="nav_inactive">#B0B8C4</color>
+
+    <!-- Functional Colors -->
+    <color name="primaryColor">#7EC8E3</color>
+    <color name="primaryVariant">#5DB1CE</color>
+    <color name="backgroundColor">#FFF8F2</color>
+    <color name="cardBackgroundColor">#A6FFFFFF</color>
 </resources>

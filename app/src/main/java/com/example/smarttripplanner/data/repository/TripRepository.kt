@@ -1,67 +1,84 @@
-package com.example.finalproject.data.repository
+package com.example.smarttripplanner.data.repository
 
-import android.app.Application
-import androidx.lifecycle.LiveData
-import com.example.finalproject.data.local_db.TripDao
-import com.example.finalproject.data.local_db.TripPlannerDatabase
-import com.example.finalproject.data.model.Trip
-import com.example.finalproject.data.model.TripSiteCrossRef
-import com.example.finalproject.data.model.TripWithSites
+import com.example.smarttripplanner.data.local.FavoriteDao
+import com.example.smarttripplanner.data.model.Destination
+import com.example.smarttripplanner.data.model.FavoriteEntity
+import com.example.smarttripplanner.data.remote.RetrofitClient
 
-class TripRepository(application: Application) {
+class TripRepository(private val favoriteDao: FavoriteDao) {
 
-    // Making this non-nullable fixes the LiveData return type issues
-    private val tripDao: TripDao
+    // Popular cities to show on home screen
+    private val popularSlugs = listOf(
+        "paris" to "Paris, France",
+        "london" to "London, UK",
+        "new-york-city" to "New York, USA",
+        "tokyo" to "Tokyo, Japan",
+        "dubai" to "Dubai, UAE",
+        "barcelona" to "Barcelona, Spain",
+        "amsterdam" to "Amsterdam, Netherlands",
+        "singapore" to "Singapore"
+    )
 
-    init {
-        // שליפת מופע ה-Database וה-Dao בצורה בטוחה
-        val db = TripPlannerDatabase.getDatabase(application.applicationContext)
-        tripDao = db.tripDao()
+    suspend fun getPopularDestinations(): List<Destination> {
+        return popularSlugs.mapNotNull { (slug, location) ->
+            try {
+                // Endpoint 3 — fetch real photo from Teleport
+                val imagesResponse = RetrofitClient.teleportApi.getCityImages(slug)
+                val imageUrl = imagesResponse.photos.firstOrNull()?.image?.web ?: ""
+
+                // Endpoint 2 — fetch real score
+                val scoresResponse = RetrofitClient.teleportApi.getCityScores(slug)
+                val score = (scoresResponse.score / 10).toFloat().coerceIn(0f, 10f)
+                val description = scoresResponse.summary
+
+                Destination(
+                    id = slug,
+                    name = location.substringBefore(","),
+                    location = location.substringAfter(", "),
+                    imageUrl = imageUrl,
+                    rating = ((score * 5) / 10 + 4).coerceIn(3.5f, 5f),
+                    temperature = 22,
+                    price = 100 + (slug.length * 7),
+                    description = description.take(200),
+                    category = "City"
+                )
+            } catch (e: Exception) {
+                // Fallback if API fails for this city
+                Destination(
+                    id = slug,
+                    name = location.substringBefore(","),
+                    location = location.substringAfter(", "),
+                    imageUrl = "",
+                    description = "A beautiful destination worth exploring."
+                )
+            }
+        }
     }
 
-    // שליפת כל הטיולים בזמן אמת
-    fun getAllTrips(): LiveData<List<Trip>> = tripDao.getAllTrips()
-
-    // שליפת טיול ספציפי לפי ID
-    fun getTripById(tripId: Long): LiveData<Trip> = tripDao.getTripById(tripId)
-
-    // שליפת כל הטיולים המועדפים
-    fun getFavoriteTrips(): LiveData<List<Trip>> = tripDao.getFavoriteTrips()
-
-    // הוספת טיול חדש - חייב להיות suspend
-    suspend fun insertTrip(trip: Trip) {
-        tripDao.insertTrip(trip)
+    suspend fun searchDestinations(query: String): List<Destination> {
+        return try {
+            // Endpoint 1 — search all urban areas by name
+            val response = RetrofitClient.teleportApi.getUrbanAreas()
+            response.links.items
+                .filter { it.name.contains(query, ignoreCase = true) }
+                .take(10)
+                .map { item ->
+                    val slug = item.href.substringAfter("slug:").removeSuffix("/")
+                    Destination(
+                        id = slug,
+                        name = item.name,
+                        location = "World",
+                        imageUrl = ""
+                    )
+                }
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
-    // מחיקת טיול - חייב להיות suspend
-    suspend fun deleteTrip(trip: Trip) {
-        tripDao.deleteTrip(trip)
-    }
-
-    // עדכון פרטי טיול (שם, תאריך, שעות) - חייב להיות suspend
-    suspend fun updateTrip(trip: Trip) {
-        tripDao.updateTrip(trip)
-    }
-
-    // עדכון סטטוס מועדף - חייב להיות suspend
-    suspend fun updateFavoriteStatus(tripId: Long, isFavorite: Boolean) {
-        tripDao.updateFavoriteStatus(tripId, isFavorite)
-    }
-
-
-    // --- ניהול הלו"ז (טבלת הקשר) ---
-
-    // הוספת אתר/מסעדה לתוך מסלול הטיול - חייב להיות suspend
-    suspend fun insertSiteToTrip(crossRef: TripSiteCrossRef) {
-        tripDao.insertSiteToTrip(crossRef)
-    }
-
-    // מחיקת אתר מתוך טיול ספציפי - חייב להיות suspend
-    suspend fun removeSiteFromTrip(tripId: Long, siteId: String) {
-        tripDao.removeSiteFromTrip(tripId, siteId)
-    }
-
-    fun getTripWithSites(tripId: Long): LiveData<TripWithSites> {
-        return tripDao.getTripWithSites(tripId)
-    }
+    // Room operations
+    fun getAllFavorites() = favoriteDao.getAllFavorites()
+    fun isFavorite(id: String) = favoriteDao.isFavorite(id)
+    suspend fun addFavorite(fav: FavoriteEntity) = favoriteDao.insert(fav)
+    suspend fun removeFavorite(id: String) = favoriteDao.deleteById(id)
 }

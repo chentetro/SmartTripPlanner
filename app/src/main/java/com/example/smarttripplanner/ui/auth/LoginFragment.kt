@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.smarttripplanner.R
-import androidx.room.util.findColumnIndexBySuffix
 import com.example.smarttripplanner.databinding.LoginLayoutBinding
 
 class LoginFragment :  Fragment()
