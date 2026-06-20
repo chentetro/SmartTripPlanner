@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.smarttripplanner.data.model.SavedSite
 import com.example.smarttripplanner.data.model.Trip
-import com.example.smarttripplanner.data.model.TripWithSites
 
 @Dao
 interface TripDao {
@@ -12,11 +11,24 @@ interface TripDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrip(trip: Trip): Long
 
-    @Delete
-    suspend fun deleteTrip(trip: Trip)
+    @Query("DELETE FROM trips WHERE trip_id = :tripId")
+    suspend fun deleteTripById(tripId: Long)
 
-    @Update
-    suspend fun updateTrip(trip: Trip)
+    @Query(
+        """
+        UPDATE trips
+        SET trip_name = :name,
+            total_start_time = :startTime,
+            total_end_time = :endTime
+        WHERE trip_id = :tripId
+        """
+    )
+    suspend fun updateTripDetails(
+        tripId: Long,
+        name: String,
+        startTime: String,
+        endTime: String
+    )
 
     @Query("UPDATE trips SET is_favorite = :isFavorite WHERE trip_id = :tripId")
     suspend fun updateFavoriteStatus(tripId: Long, isFavorite: Boolean)
@@ -30,19 +42,9 @@ interface TripDao {
     @Query("SELECT * FROM trips WHERE trip_id = :tripId")
     fun getTripById(tripId: Long): LiveData<Trip>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSavedSite(savedSite: SavedSite): Long
-
-    @Update
-    suspend fun updateSavedSite(savedSite: SavedSite)
-
     @Query("DELETE FROM SavedSite WHERE siteId = :id")
     suspend fun deleteSavedSite(id: Long)
 
     @Query("SELECT * FROM SavedSite WHERE tripIdOfParent = :tripId ORDER BY visitOrder ASC")
     fun getSavedSitesForTrip(tripId: Long): LiveData<List<SavedSite>>
-
-    @Transaction
-    @Query("SELECT * FROM trips WHERE trip_id = :tripId")
-    fun getTripWithSites(tripId: Long): LiveData<TripWithSites>
 }

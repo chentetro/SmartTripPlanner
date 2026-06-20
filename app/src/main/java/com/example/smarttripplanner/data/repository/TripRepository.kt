@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import com.example.smarttripplanner.data.local_db.TripDao
 import com.example.smarttripplanner.data.model.SavedSite
 import com.example.smarttripplanner.data.model.Trip
-import com.example.smarttripplanner.data.model.TripWithSites
 import javax.inject.Inject
 
 class TripRepository @Inject constructor(
@@ -19,22 +18,26 @@ class TripRepository @Inject constructor(
 
     suspend fun insertTrip(trip: Trip): Long = tripDao.insertTrip(trip)
 
-    suspend fun deleteTrip(trip: Trip) {
-        tripDao.deleteTrip(trip)
+    suspend fun deleteTripById(tripId: Long) {
+        tripDao.deleteTripById(tripId)
     }
 
-    suspend fun updateTrip(trip: Trip) {
-        tripDao.updateTrip(trip)
+    suspend fun updateTripDetails(
+        tripId: Long,
+        name: String,
+        startTime: String,
+        endTime: String
+    ) {
+        tripDao.updateTripDetails(
+            tripId = tripId,
+            name = name,
+            startTime = startTime,
+            endTime = endTime
+        )
     }
 
     suspend fun updateFavoriteStatus(tripId: Long, isFavorite: Boolean) {
         tripDao.updateFavoriteStatus(tripId, isFavorite)
-    }
-
-    suspend fun insertSavedSite(savedSite: SavedSite): Long = tripDao.insertSavedSite(savedSite)
-
-    suspend fun updateSavedSite(savedSite: SavedSite) {
-        tripDao.updateSavedSite(savedSite)
     }
 
     suspend fun deleteSavedSite(id: Long) {
@@ -43,8 +46,4 @@ class TripRepository @Inject constructor(
 
     fun getSavedSitesForTrip(tripId: Long): LiveData<List<SavedSite>> =
         tripDao.getSavedSitesForTrip(tripId)
-
-    fun getTripWithSites(tripId: Long): LiveData<TripWithSites> {
-        return tripDao.getTripWithSites(tripId)
-    }
 }

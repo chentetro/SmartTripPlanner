@@ -1,7 +1,6 @@
 package com.example.smarttripplanner.ui.questionnaire
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -30,8 +29,8 @@ class QuestionnaireFragment : Fragment() {
     private var userLongitude: Double? = null
 
     private val locationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            if (hasLocationPermission()) {
                 fetchCurrentLocation()
             } else {
                 binding.tvLocationStatus.text = "Location permission denied"
@@ -73,11 +72,16 @@ class QuestionnaireFragment : Fragment() {
     }
 
     private fun requestLocationOrFetch() {
-        if (hasFineLocationPermission()) {
+        if (hasLocationPermission()) {
             fetchCurrentLocation()
         } else {
             binding.tvLocationStatus.text = "Waiting for location permission"
-            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
         }
     }
 
@@ -88,9 +92,24 @@ class QuestionnaireFragment : Fragment() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    @SuppressLint("MissingPermission")
+    private fun hasLocationPermission(): Boolean {
+        return hasFineLocationPermission() || ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
     private fun fetchCurrentLocation() {
-        if (!hasFineLocationPermission()) {
+        val fineLocationGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val coarseLocationGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!fineLocationGranted && !coarseLocationGranted) {
             requestLocationOrFetch()
             return
         }

@@ -54,10 +54,6 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    lint {
-        disable += "NullSafeMutableLiveData"
-        abortOnError = false
-    }
 }
 
 dependencies {

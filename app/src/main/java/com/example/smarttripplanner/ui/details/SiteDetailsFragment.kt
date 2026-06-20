@@ -54,12 +54,16 @@ class SiteDetailsFragment : Fragment() {
         binding.tvDetailedSiteDescription.text =
             site.description ?: "No description available yet."
 
-        Glide.with(binding.ivDetailedSiteImage)
-            .load(site.imageUrl.toImageModel())
-            .placeholder(R.drawable.outline_mode_of_travel_24)
-            .error(R.drawable.outline_mode_of_travel_24)
-            .fallback(R.drawable.outline_mode_of_travel_24)
-            .into(binding.ivDetailedSiteImage)
+        val photoBytes = site.photoBytes
+        if (photoBytes != null) {
+            Glide.with(binding.root.context)
+                .load(photoBytes)
+                .placeholder(R.drawable.outline_mode_of_travel_24)
+                .error(R.drawable.outline_mode_of_travel_24)
+                .into(binding.ivDetailedSiteImage)
+        } else {
+            binding.ivDetailedSiteImage.setImageResource(R.drawable.outline_mode_of_travel_24)
+        }
 
         val siteUrl = site.siteUrl
         binding.btnOpenOfficialWebsite.visibility =
@@ -69,13 +73,6 @@ class SiteDetailsFragment : Fragment() {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(siteUrl)))
             }
         }
-    }
-
-    private fun String?.toImageModel(): Any? {
-        if (isNullOrBlank()) return null
-        if (startsWith("http://") || startsWith("https://")) return this
-        val resourceId = resources.getIdentifier(this, "drawable", requireContext().packageName)
-        return resourceId.takeIf { it != 0 }
     }
 
     override fun onDestroyView() {

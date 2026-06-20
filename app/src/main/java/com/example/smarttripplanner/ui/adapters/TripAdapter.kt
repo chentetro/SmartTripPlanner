@@ -3,8 +3,6 @@ package com.example.smarttripplanner.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smarttripplanner.data.model.Trip
 import com.example.smarttripplanner.databinding.ItemTripBinding
@@ -14,7 +12,21 @@ import java.util.Locale
 
 class TripAdapter(
     private val onTripClick: (Trip) -> Unit
-) : ListAdapter<Trip, TripAdapter.TripViewHolder>(TripDiffCallback()) {
+) : RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
+
+    var currentList: List<Trip> = emptyList()
+        private set
+
+    fun submitList(newList: List<Trip>) {
+        currentList = newList
+        notifyDataSetChanged()
+    }
+
+    fun removeItem(position: Int, newList: List<Trip>) {
+        currentList = newList
+        notifyItemRemoved(position)
+        notifyItemRangeChanged(position, currentList.size)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TripViewHolder {
         val binding = ItemTripBinding.inflate(
@@ -26,8 +38,10 @@ class TripAdapter(
     }
 
     override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(currentList[position])
     }
+
+    override fun getItemCount(): Int = currentList.size
 
     class TripViewHolder(
         private val binding: ItemTripBinding,
@@ -49,13 +63,5 @@ class TripAdapter(
                 onTripClick(trip)
             }
         }
-    }
-
-    private class TripDiffCallback : DiffUtil.ItemCallback<Trip>() {
-        override fun areItemsTheSame(oldItem: Trip, newItem: Trip): Boolean =
-            oldItem.id == newItem.id
-
-        override fun areContentsTheSame(oldItem: Trip, newItem: Trip): Boolean =
-            oldItem == newItem
     }
 }

@@ -124,13 +124,48 @@ class SiteRepository @Inject constructor(
         details.photos
             ?.firstOrNull()
             ?.name
-            ?.toGooglePhotoUrl()
-            ?.let { photoUrl ->
-                savedSiteDao.updateSavedSiteImageUrl(
-                    placeId = placeId,
-                    imageUrl = photoUrl
+            ?.let { photoName ->
+                getPlacePhotoAsBytes(
+                    apiKey = BuildConfig.GOOGLE_PLACES_API_KEY,
+                    photoName = photoName,
+                    maxWidth = PHOTO_MAX_WIDTH_PX
                 )
             }
+            ?.let { photoBytes ->
+                savedSiteDao.updateSavedSitePhotoBytes(
+                    placeId = placeId,
+                    photoBytes = photoBytes
+                )
+            }
+    }
+
+    suspend fun getPlacePhotoAsBytes(
+        apiKey: String,
+        photoName: String,
+        maxWidth: Int = DEFAULT_PHOTO_WIDTH_PX
+    ): ByteArray? {
+        if (apiKey.isBlank() || photoName.isBlank()) {
+            return null
+        }
+
+        return try {
+            val response = googlePlacesApi.fetchPlacePhoto(
+                apiKey = apiKey,
+                photoName = photoName,
+                maxWidthPx = maxWidth,
+                maxHeightPx = maxWidth
+            )
+            val responseBody = response.body()
+
+            if (response.isSuccessful && responseBody != null) {
+                responseBody.use { it.bytes() }
+            } else {
+                null
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            null
+        }
     }
 
     private fun String.toGooglePlaceTypes(): List<String> {
@@ -189,15 +224,10 @@ class SiteRepository @Inject constructor(
         return "ic_launcher_background"
     }
 
-    private fun String.toGooglePhotoUrl(): String {
-        return "$GOOGLE_PLACES_BASE_URL/v1/$this/media" +
-            "?maxWidthPx=$PHOTO_MAX_WIDTH_PX&key=${BuildConfig.GOOGLE_PLACES_API_KEY}"
-    }
-
     private companion object {
-        const val GOOGLE_PLACES_BASE_URL = "https://places.googleapis.com"
         const val MAX_NEARBY_RESULTS = 7
         const val PHOTO_MAX_WIDTH_PX = 800
+        const val DEFAULT_PHOTO_WIDTH_PX = 400
         const val NEARBY_SEARCH_FIELD_MASK =
             "places.id,places.displayName,places.primaryType,places.types,places.location"
         const val PLACE_DETAILS_FIELD_MASK =
