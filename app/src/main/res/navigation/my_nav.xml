@@ -66,8 +66,8 @@
         android:label="site_details_layout"
         tools:layout="@layout/site_details_layout" >
         <argument
-            android:name="siteId"
-            android:defaultValue="-1L"
-            app:argType="long" />
+            android:name="placeId"
+            android:defaultValue=""
+            app:argType="string" />
     </fragment>
 </navigation>

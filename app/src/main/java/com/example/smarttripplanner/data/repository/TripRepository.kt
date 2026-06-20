@@ -1,21 +1,15 @@
 package com.example.smarttripplanner.data.repository
 
-import android.app.Application
 import androidx.lifecycle.LiveData
 import com.example.smarttripplanner.data.local_db.TripDao
-import com.example.smarttripplanner.data.local_db.TripPlannerDatabase
 import com.example.smarttripplanner.data.model.SavedSite
 import com.example.smarttripplanner.data.model.Trip
 import com.example.smarttripplanner.data.model.TripWithSites
+import javax.inject.Inject
 
-class TripRepository(application: Application) {
-
+class TripRepository @Inject constructor(
     private val tripDao: TripDao
-
-    init {
-        val db = TripPlannerDatabase.getDatabase(application.applicationContext)
-        tripDao = db.tripDao()
-    }
+) {
 
     fun getAllTrips(): LiveData<List<Trip>> = tripDao.getAllTrips()
 

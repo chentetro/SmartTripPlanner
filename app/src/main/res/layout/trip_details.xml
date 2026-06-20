@@ -89,15 +89,7 @@
             app:strokeColor="#FFFFFF"
             app:strokeWidth="2dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnShareToFirebase"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Share"
-            android:textColor="#1E73E8"
-            app:backgroundTint="#FFFFFF"
-            app:cornerRadius="0dp" />
+
 
     </LinearLayout>
 

@@ -6,19 +6,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.smarttripplanner.R
-import com.example.smarttripplanner.data.repository.TripRepository
 import com.example.smarttripplanner.databinding.FavoritesLayoutBinding
 import com.example.smarttripplanner.ui.adapters.TripAdapter
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FavoritesFragment : Fragment() {
 
     private var _binding: FavoritesLayoutBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var tripRepository: TripRepository
+    private val viewModel: FavoritesViewModel by viewModels()
     private lateinit var tripAdapter: TripAdapter
 
     override fun onCreateView(
@@ -33,8 +35,6 @@ class FavoritesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tripRepository = TripRepository(requireActivity().application)
-
         tripAdapter = TripAdapter { trip ->
             findNavController().navigate(
                 R.id.action_favoritesFragment_to_tripDetailsFragment,
@@ -47,7 +47,7 @@ class FavoritesFragment : Fragment() {
             adapter = tripAdapter
         }
 
-        tripRepository.getFavoriteTrips().observe(viewLifecycleOwner) { trips ->
+        viewModel.favoriteTrips.observe(viewLifecycleOwner) { trips ->
             tripAdapter.submitList(trips)
             binding.tvEmptyFavorites.visibility = if (trips.isNullOrEmpty()) View.VISIBLE else View.GONE
             binding.rvFavoriteTrips.visibility = if (trips.isNullOrEmpty()) View.GONE else View.VISIBLE

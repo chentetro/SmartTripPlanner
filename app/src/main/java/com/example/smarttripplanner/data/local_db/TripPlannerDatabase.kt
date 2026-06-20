@@ -9,7 +9,7 @@ import com.example.smarttripplanner.data.model.Trip
 
 @Database(
     entities = [Trip::class, SavedSite::class],
-    version = 2,
+    version = 5,
     exportSchema = false
 )
 abstract class TripPlannerDatabase : RoomDatabase() {
