@@ -47,4 +47,7 @@ interface SavedSiteDao {
 
     @Query("UPDATE SavedSite SET image_url = :imageUrl WHERE place_id = :placeId")
     suspend fun updateSavedSiteImageUrl(placeId: String, imageUrl: String?)
+
+    @Query("UPDATE SavedSite SET photo_bytes = :photoBytes WHERE place_id = :placeId")
+    suspend fun updateSavedSitePhotoBytes(placeId: String, photoBytes: ByteArray?)
 }

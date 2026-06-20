@@ -3,8 +3,6 @@ package com.example.smarttripplanner.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.smarttripplanner.R
@@ -14,7 +12,15 @@ import com.example.smarttripplanner.databinding.ItemSiteBinding
 class SiteAdapter(
     private val onSiteClick: (String) -> Unit,
     private val onDeleteClick: (SavedSite) -> Unit
-) : ListAdapter<SavedSite, SiteAdapter.SiteViewHolder>(SiteDiffCallback()) {
+) : RecyclerView.Adapter<SiteAdapter.SiteViewHolder>() {
+
+    var currentList: List<SavedSite> = emptyList()
+        private set
+
+    fun submitList(newList: List<SavedSite>) {
+        currentList = newList
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SiteViewHolder {
         val binding = ItemSiteBinding.inflate(
@@ -26,8 +32,10 @@ class SiteAdapter(
     }
 
     override fun onBindViewHolder(holder: SiteViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(currentList[position])
     }
+
+    override fun getItemCount(): Int = currentList.size
 
     class SiteViewHolder(
         private val binding: ItemSiteBinding,
@@ -47,30 +55,19 @@ class SiteAdapter(
                 binding.tvSiteRating.text = "★ ${site.rating}"
             }
 
-            Glide.with(binding.ivSiteImage)
-                .load(site.imageUrl.toImageModel(binding.root.context))
-                .placeholder(R.drawable.outline_mode_of_travel_24)
-                .error(R.drawable.outline_mode_of_travel_24)
-                .fallback(R.drawable.outline_mode_of_travel_24)
-                .into(binding.ivSiteImage)
+            val photoBytes = site.photoBytes
+            if (photoBytes != null) {
+                Glide.with(binding.root.context)
+                    .load(photoBytes)
+                    .placeholder(R.drawable.outline_mode_of_travel_24)
+                    .error(R.drawable.outline_mode_of_travel_24)
+                    .into(binding.ivSiteImage)
+            } else {
+                binding.ivSiteImage.setImageResource(R.drawable.outline_mode_of_travel_24)
+            }
 
             binding.root.setOnClickListener { onSiteClick(site.placeId) }
             binding.btnDeleteSite.setOnClickListener { onDeleteClick(site) }
         }
-
-        private fun String?.toImageModel(context: android.content.Context): Any? {
-            if (isNullOrBlank()) return null
-            if (startsWith("http://") || startsWith("https://")) return this
-            val resourceId = context.resources.getIdentifier(this, "drawable", context.packageName)
-            return resourceId.takeIf { it != 0 }
-        }
-    }
-
-    private class SiteDiffCallback : DiffUtil.ItemCallback<SavedSite>() {
-        override fun areItemsTheSame(oldItem: SavedSite, newItem: SavedSite): Boolean =
-            oldItem.siteId == newItem.siteId
-
-        override fun areContentsTheSame(oldItem: SavedSite, newItem: SavedSite): Boolean =
-            oldItem == newItem
     }
 }

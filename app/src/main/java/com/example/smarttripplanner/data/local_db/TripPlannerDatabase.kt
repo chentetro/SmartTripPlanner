@@ -9,7 +9,7 @@ import com.example.smarttripplanner.data.model.Trip
 
 @Database(
     entities = [Trip::class, SavedSite::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class TripPlannerDatabase : RoomDatabase() {
@@ -28,7 +28,6 @@ abstract class TripPlannerDatabase : RoomDatabase() {
                 "trip_planner_db"
             )
                 .fallbackToDestructiveMigration()
-                .allowMainThreadQueries()
                 .build()
                 .also { instance = it }
         }

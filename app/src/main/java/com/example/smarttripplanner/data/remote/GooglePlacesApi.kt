@@ -1,10 +1,14 @@
 package com.example.smarttripplanner.data.remote
 
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
+import retrofit2.http.Streaming
 
 interface GooglePlacesApi {
 
@@ -21,4 +25,13 @@ interface GooglePlacesApi {
         @Header("X-Goog-FieldMask") fieldMask: String,
         @Path("placeId") placeId: String
     ): GooglePlaceDto
+
+    @Streaming
+    @GET("v1/{photoName}/media")
+    suspend fun fetchPlacePhoto(
+        @Header("X-Goog-Api-Key") apiKey: String,
+        @Path("photoName", encoded = true) photoName: String,
+        @Query("maxWidthPx") maxWidthPx: Int? = null,
+        @Query("maxHeightPx") maxHeightPx: Int? = null
+    ): Response<ResponseBody>
 }

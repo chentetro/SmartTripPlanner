@@ -48,6 +48,9 @@ data class SavedSite(
     @ColumnInfo(name = "image_url")
     val imageUrl: String?,
 
+    @ColumnInfo(name = "photo_bytes")
+    val photoBytes: ByteArray? = null,
+
     @ColumnInfo(name = "description_site")
     val description: String?,
 
