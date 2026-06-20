@@ -23,6 +23,28 @@ interface SavedSiteDao {
     @Query("SELECT * FROM SavedSite WHERE siteId = :id")
     fun getSavedSiteDetails(id: Long): LiveData<SavedSite>
 
+    @Query("SELECT * FROM SavedSite WHERE place_id = :placeId")
+    fun getSavedSiteDetailsByPlaceId(placeId: String): LiveData<SavedSite>
+
     @Query("SELECT * FROM SavedSite WHERE tripIdOfParent = :tripId ORDER BY visitOrder ASC")
     fun getSavedSitesForTrip(tripId: Long): LiveData<List<SavedSite>>
+
+    @Query(
+        """
+        UPDATE SavedSite
+        SET rating_site = :rating,
+            description_site = :description,
+            site_url = :siteUrl
+        WHERE place_id = :placeId
+        """
+    )
+    suspend fun updateMissingDetails(
+        placeId: String,
+        rating: String?,
+        description: String?,
+        siteUrl: String?
+    )
+
+    @Query("UPDATE SavedSite SET image_url = :imageUrl WHERE place_id = :placeId")
+    suspend fun updateSavedSiteImageUrl(placeId: String, imageUrl: String?)
 }

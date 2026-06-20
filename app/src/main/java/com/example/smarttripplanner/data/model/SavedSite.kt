@@ -27,7 +27,8 @@ data class SavedSite(
 
     val tripIdOfParent: Long,
 
-    val openTripMapXid: String,
+    @ColumnInfo(name = "place_id")
+    val placeId: String,
 
     @ColumnInfo(name = "name_site")
     val name: String,

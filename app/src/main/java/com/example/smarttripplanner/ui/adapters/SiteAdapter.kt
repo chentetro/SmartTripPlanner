@@ -1,16 +1,18 @@
 package com.example.smarttripplanner.ui.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.smarttripplanner.R
 import com.example.smarttripplanner.data.model.SavedSite
 import com.example.smarttripplanner.databinding.ItemSiteBinding
 
 class SiteAdapter(
-    private val onSiteClick: (SavedSite) -> Unit,
+    private val onSiteClick: (String) -> Unit,
     private val onDeleteClick: (SavedSite) -> Unit
 ) : ListAdapter<SavedSite, SiteAdapter.SiteViewHolder>(SiteDiffCallback()) {
 
@@ -29,7 +31,7 @@ class SiteAdapter(
 
     class SiteViewHolder(
         private val binding: ItemSiteBinding,
-        private val onSiteClick: (SavedSite) -> Unit,
+        private val onSiteClick: (String) -> Unit,
         private val onDeleteClick: (SavedSite) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -37,17 +39,30 @@ class SiteAdapter(
             val orderPrefix = site.visitOrder?.let { "$it. " } ?: ""
             binding.tvSiteOrderAndName.text = "$orderPrefix${site.name}"
             binding.tvSiteCategory.text = site.category
-            binding.tvSiteRating.text = "★ ${site.rating ?: "N/A"}"
 
-            if (site.imageUrl.isNullOrBlank()) {
-                binding.ivSiteImage.setImageResource(R.drawable.outline_mode_of_travel_24)
+            if (site.rating.isNullOrBlank()) {
+                binding.tvSiteRating.visibility = View.GONE
             } else {
-                // Glide can load site.imageUrl here when the dependency is added.
-                binding.ivSiteImage.setImageResource(R.drawable.outline_mode_of_travel_24)
+                binding.tvSiteRating.visibility = View.VISIBLE
+                binding.tvSiteRating.text = "★ ${site.rating}"
             }
 
-            binding.root.setOnClickListener { onSiteClick(site) }
+            Glide.with(binding.ivSiteImage)
+                .load(site.imageUrl.toImageModel(binding.root.context))
+                .placeholder(R.drawable.outline_mode_of_travel_24)
+                .error(R.drawable.outline_mode_of_travel_24)
+                .fallback(R.drawable.outline_mode_of_travel_24)
+                .into(binding.ivSiteImage)
+
+            binding.root.setOnClickListener { onSiteClick(site.placeId) }
             binding.btnDeleteSite.setOnClickListener { onDeleteClick(site) }
+        }
+
+        private fun String?.toImageModel(context: android.content.Context): Any? {
+            if (isNullOrBlank()) return null
+            if (startsWith("http://") || startsWith("https://")) return this
+            val resourceId = context.resources.getIdentifier(this, "drawable", context.packageName)
+            return resourceId.takeIf { it != 0 }
         }
     }
 

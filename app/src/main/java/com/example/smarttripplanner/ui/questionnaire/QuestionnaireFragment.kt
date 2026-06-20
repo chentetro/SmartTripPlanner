@@ -11,16 +11,20 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.example.smarttripplanner.R
 import com.example.smarttripplanner.databinding.QuestionnaireLayoutBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class QuestionnaireFragment : Fragment() {
 
     private var _binding: QuestionnaireLayoutBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: QuestionnaireViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var userLatitude: Double? = null
     private var userLongitude: Double? = null
@@ -58,8 +62,10 @@ class QuestionnaireFragment : Fragment() {
         }
 
         binding.btnFindPlaces.setOnClickListener {
-            showOpenTripMapQueryPreview()
+            submitQuestionnaire()
         }
+
+        observeQuestionnaireState()
     }
 
     private fun updateRadiusLabel(distanceKm: Int) {
@@ -106,7 +112,7 @@ class QuestionnaireFragment : Fragment() {
             }
     }
 
-    private fun showOpenTripMapQueryPreview() {
+    private fun submitQuestionnaire() {
         val lat = userLatitude
         val lon = userLongitude
 
@@ -115,40 +121,69 @@ class QuestionnaireFragment : Fragment() {
             return
         }
 
-        val kinds = selectedOpenTripMapKinds()
-        val radiusMeters = binding.sliderMaxDistance.value.toInt() * 1000
-        val rate = selectedOpenTripMapRate()
-        val rateText = rate?.let { ", rate=$it" } ?: ""
+        val tripName = binding.etTripName.text?.toString()?.trim().orEmpty()
+        val tripDate = binding.etTripDate.text?.toString()?.trim().orEmpty()
+        val participants = binding.etParticipants.text?.toString()?.toIntOrNull()
+        val startTime = binding.etStartTime.text?.toString()?.trim().orEmpty()
+        val endTime = binding.etEndTime.text?.toString()?.trim().orEmpty()
 
-        Toast.makeText(
-            requireContext(),
-            "OpenTripMap: lat=$lat, lon=$lon, radius=$radiusMeters, kinds=$kinds$rateText",
-            Toast.LENGTH_LONG
-        ).show()
-    }
-
-    private fun selectedOpenTripMapKinds(): String {
-        val selectedKinds = binding.chipGroupKinds.checkedChipIds.mapNotNull { chipId ->
-            when (chipId) {
-                R.id.chipNature -> "natural"
-                R.id.chipMuseums -> "museums"
-                R.id.chipFood -> "foods"
-                R.id.chipHistory -> "historic"
-                R.id.chipArchitecture -> "architecture"
-                R.id.chipCulture -> "cultural"
-                else -> null
-            }
+        if (tripName.isBlank()) {
+            Toast.makeText(requireContext(), "Please enter a trip name", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        return selectedKinds.joinToString(",").ifBlank { "interesting_places" }
+        if (tripDate.isBlank()) {
+            Toast.makeText(requireContext(), "Please enter a trip date", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (participants == null || participants <= 0) {
+            Toast.makeText(requireContext(), "Please enter a valid participants count", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val radiusKilometers = binding.sliderMaxDistance.value.toInt()
+        val selectedKindChipIds = binding.chipGroupKinds.checkedChipIds
+
+        viewModel.generateTrip(
+            name = tripName,
+            date = tripDate,
+            lat = lat,
+            lon = lon,
+            radiusKilometers = radiusKilometers,
+            selectedKindChipIds = selectedKindChipIds,
+            participantsCount = participants,
+            startTime = startTime,
+            endTime = endTime
+        )
     }
 
-    private fun selectedOpenTripMapRate(): Int? {
-        return when (binding.chipGroupRate.checkedChipId) {
-            R.id.chipRateAny -> null
-            R.id.chipRateNamed -> 2
-            R.id.chipRatePopular -> 3
-            else -> 2
+    private fun observeQuestionnaireState() {
+        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                QuestionnaireUiState.Idle -> {
+                    binding.btnFindPlaces.isEnabled = true
+                    binding.btnFindPlaces.text = "Find places"
+                }
+                QuestionnaireUiState.Loading -> {
+                    binding.btnFindPlaces.isEnabled = false
+                    binding.btnFindPlaces.text = "Creating trip..."
+                }
+                is QuestionnaireUiState.Success -> {
+                    binding.btnFindPlaces.isEnabled = true
+                    binding.btnFindPlaces.text = "Find places"
+                    val action =
+                        QuestionnaireFragmentDirections.actionQuestionnaireFragmentToTripDetailsFragment(state.tripId)
+                    findNavController().navigate(action)
+                    viewModel.resetState()
+                }
+                is QuestionnaireUiState.Error -> {
+                    binding.btnFindPlaces.isEnabled = true
+                    binding.btnFindPlaces.text = "Find places"
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                    viewModel.resetState()
+                }
+            }
         }
     }
 

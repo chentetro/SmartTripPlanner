@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Tell us what you want, then we will search OpenTripMap places."
+                android:text="Tell us what you want, then we will search Google Places."
                 android:textColor="#D9FFFFFF"
                 android:textSize="14sp" />
 
@@ -182,7 +182,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="OpenTripMap needs your current coordinates to find nearby places."
+                android:text="Google Places needs your current coordinates to find nearby places."
                 android:textColor="#666666"
                 android:textSize="13sp" />
 
