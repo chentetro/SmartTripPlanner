@@ -12,10 +12,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.smarttripplanner.R
+import com.example.smarttripplanner.databinding.QuestionnaireLayoutBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.example.smarttripplanner.databinding.QuestionnaireLayoutBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -25,15 +26,16 @@ class QuestionnaireFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: QuestionnaireViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var userLatitude: Double? = null
-    private var userLongitude: Double? = null
 
     private val locationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-            if (hasLocationPermission()) {
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val isGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+            if (isGranted) {
                 fetchCurrentLocation()
             } else {
-                binding.tvLocationStatus.text = "Location permission denied"
+                showLocationPermissionDenied()
             }
         }
 
@@ -68,14 +70,14 @@ class QuestionnaireFragment : Fragment() {
     }
 
     private fun updateRadiusLabel(distanceKm: Int) {
-        binding.tvRadiusValue.text = "Max distance: $distanceKm km"
+        binding.tvRadiusValue.text = getString(R.string.questionnaire_radius_value, distanceKm)
     }
 
     private fun requestLocationOrFetch() {
         if (hasLocationPermission()) {
             fetchCurrentLocation()
         } else {
-            binding.tvLocationStatus.text = "Waiting for location permission"
+            binding.tvLocationStatus.text = getString(R.string.questionnaire_location_permission_pending)
             locationPermissionLauncher.launch(
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -110,70 +112,61 @@ class QuestionnaireFragment : Fragment() {
         ) == PackageManager.PERMISSION_GRANTED
 
         if (!fineLocationGranted && !coarseLocationGranted) {
-            requestLocationOrFetch()
+            showLocationPermissionDenied()
             return
         }
 
-        binding.tvLocationStatus.text = "Getting current location..."
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+        binding.tvLocationStatus.text = getString(R.string.questionnaire_getting_location)
+        val priority = if (fineLocationGranted) {
+            Priority.PRIORITY_HIGH_ACCURACY
+        } else {
+            Priority.PRIORITY_BALANCED_POWER_ACCURACY
+        }
+
+        fusedLocationClient.getCurrentLocation(priority, null)
             .addOnSuccessListener { location ->
+                val currentBinding = _binding ?: return@addOnSuccessListener
                 if (location == null) {
-                    binding.tvLocationStatus.text = "Could not secure location. Try again."
+                    currentBinding.tvLocationStatus.text =
+                        getString(R.string.questionnaire_location_unavailable)
                     return@addOnSuccessListener
                 }
 
-                userLatitude = location.latitude
-                userLongitude = location.longitude
-                binding.tvLocationStatus.text = "Location secured successfully"
+                viewModel.updateLocation(
+                    latitude = location.latitude,
+                    longitude = location.longitude
+                )
+                currentBinding.tvLocationStatus.text = getString(R.string.questionnaire_location_secured)
             }
             .addOnFailureListener {
-                binding.tvLocationStatus.text = "Could not secure location. Try again."
+                val currentBinding = _binding ?: return@addOnFailureListener
+                currentBinding.tvLocationStatus.text =
+                    getString(R.string.questionnaire_location_unavailable)
             }
     }
 
+    private fun showLocationPermissionDenied() {
+        val currentBinding = _binding ?: return
+        currentBinding.tvLocationStatus.text =
+            getString(R.string.questionnaire_location_permission_denied_status)
+        context?.let {
+            Toast.makeText(
+                it,
+                getString(R.string.questionnaire_location_permission_denied_message),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     private fun submitQuestionnaire() {
-        val lat = userLatitude
-        val lon = userLongitude
-
-        if (lat == null || lon == null) {
-            Toast.makeText(requireContext(), "Please secure your current location first", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val tripName = binding.etTripName.text?.toString()?.trim().orEmpty()
-        val tripDate = binding.etTripDate.text?.toString()?.trim().orEmpty()
-        val participants = binding.etParticipants.text?.toString()?.toIntOrNull()
-        val startTime = binding.etStartTime.text?.toString()?.trim().orEmpty()
-        val endTime = binding.etEndTime.text?.toString()?.trim().orEmpty()
-
-        if (tripName.isBlank()) {
-            Toast.makeText(requireContext(), "Please enter a trip name", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (tripDate.isBlank()) {
-            Toast.makeText(requireContext(), "Please enter a trip date", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (participants == null || participants <= 0) {
-            Toast.makeText(requireContext(), "Please enter a valid participants count", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val radiusKilometers = binding.sliderMaxDistance.value.toInt()
-        val selectedKindChipIds = binding.chipGroupKinds.checkedChipIds
-
         viewModel.generateTrip(
-            name = tripName,
-            date = tripDate,
-            lat = lat,
-            lon = lon,
-            radiusKilometers = radiusKilometers,
-            selectedKindChipIds = selectedKindChipIds,
-            participantsCount = participants,
-            startTime = startTime,
-            endTime = endTime
+            name = binding.etTripName.text?.toString().orEmpty(),
+            date = binding.etTripDate.text?.toString().orEmpty(),
+            participantsText = binding.etParticipants.text?.toString().orEmpty(),
+            startTime = binding.etStartTime.text?.toString().orEmpty(),
+            endTime = binding.etEndTime.text?.toString().orEmpty(),
+            radiusKilometers = binding.sliderMaxDistance.value.toInt(),
+            selectedKindChipIds = binding.chipGroupKinds.checkedChipIds
         )
     }
 
@@ -182,15 +175,15 @@ class QuestionnaireFragment : Fragment() {
             when (state) {
                 QuestionnaireUiState.Idle -> {
                     binding.btnFindPlaces.isEnabled = true
-                    binding.btnFindPlaces.text = "Find places"
+                    binding.btnFindPlaces.text = getString(R.string.questionnaire_find_places)
                 }
                 QuestionnaireUiState.Loading -> {
                     binding.btnFindPlaces.isEnabled = false
-                    binding.btnFindPlaces.text = "Creating trip..."
+                    binding.btnFindPlaces.text = getString(R.string.questionnaire_creating_trip)
                 }
                 is QuestionnaireUiState.Success -> {
                     binding.btnFindPlaces.isEnabled = true
-                    binding.btnFindPlaces.text = "Find places"
+                    binding.btnFindPlaces.text = getString(R.string.questionnaire_find_places)
                     val action =
                         QuestionnaireFragmentDirections.actionQuestionnaireFragmentToTripDetailsFragment(state.tripId)
                     findNavController().navigate(action)
@@ -198,7 +191,7 @@ class QuestionnaireFragment : Fragment() {
                 }
                 is QuestionnaireUiState.Error -> {
                     binding.btnFindPlaces.isEnabled = true
-                    binding.btnFindPlaces.text = "Find places"
+                    binding.btnFindPlaces.text = getString(R.string.questionnaire_find_places)
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                     viewModel.resetState()
                 }

@@ -1,7 +1,9 @@
 package com.example.smarttripplanner.data.repository
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import com.example.smarttripplanner.BuildConfig
+import com.example.smarttripplanner.R
 import com.example.smarttripplanner.data.local_db.SavedSiteDao
 import com.example.smarttripplanner.data.model.SavedSite
 import com.example.smarttripplanner.data.remote.GoogleCircleDto
@@ -10,11 +12,13 @@ import com.example.smarttripplanner.data.remote.GoogleLocationRestrictionDto
 import com.example.smarttripplanner.data.remote.GoogleNearbySearchRequestDto
 import com.example.smarttripplanner.data.remote.GooglePlaceDto
 import com.example.smarttripplanner.data.remote.GooglePlacesApi
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class SiteRepository @Inject constructor(
     private val savedSiteDao: SavedSiteDao,
-    private val googlePlacesApi: GooglePlacesApi
+    private val googlePlacesApi: GooglePlacesApi,
+    @ApplicationContext private val context: Context
 ) {
 
     fun getSavedSiteDetails(siteId: Long): LiveData<SavedSite> =
@@ -63,7 +67,7 @@ class SiteRepository @Inject constructor(
         ).places.orEmpty()
 
         require(remoteSites.isNotEmpty()) {
-            "No places found for the selected questionnaire filters."
+            context.getString(R.string.no_places_found_for_filters)
         }
 
         val savedSites = remoteSites.mapIndexedNotNull { index, site ->
@@ -74,7 +78,8 @@ class SiteRepository @Inject constructor(
             SavedSite(
                 tripIdOfParent = tripId,
                 placeId = placeId,
-                name = site.displayName?.text.orEmpty().ifBlank { "Unnamed place" },
+                name = site.displayName?.text.orEmpty()
+                    .ifBlank { context.getString(R.string.unnamed_place) },
                 category = category,
                 latitude = location.latitude,
                 longitude = location.longitude,
@@ -87,7 +92,7 @@ class SiteRepository @Inject constructor(
         }
 
         require(savedSites.isNotEmpty()) {
-            "Google Places returned places without usable coordinates."
+            context.getString(R.string.places_without_usable_coordinates)
         }
 
         savedSites.forEach { savedSite ->
@@ -105,7 +110,7 @@ class SiteRepository @Inject constructor(
 
     suspend fun fetchAndSaveMissingDetails(placeId: String) {
         require(placeId.isNotBlank()) {
-            "Missing Google place id."
+            context.getString(R.string.missing_google_place_id)
         }
 
         val details = googlePlacesApi.getPlaceDetails(
