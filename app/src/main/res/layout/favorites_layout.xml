@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Favorite Trips"
+            android:text="@string/favorite_trips"
             android:textColor="#FFFFFF"
             android:textSize="28sp"
             android:textStyle="bold" />
@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Your saved favorite trips"
+            android:text="@string/your_saved_favorite_trips"
             android:textColor="#D9FFFFFF"
             android:textSize="14sp" />
 
@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="24dp"
-        android:text="No favorite trips yet.\nOpen a trip and tap Add to Favorites."
+        android:text="@string/no_favorite_trips_yet_nopen_a_trip_and_tap_add_to_favorites"
         android:textColor="#666666"
         android:textSize="16sp"
         android:visibility="gone"

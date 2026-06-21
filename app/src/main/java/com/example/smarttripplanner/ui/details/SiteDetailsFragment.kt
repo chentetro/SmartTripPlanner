@@ -50,9 +50,11 @@ class SiteDetailsFragment : Fragment() {
     private fun bindSite(site: SavedSite) {
         binding.tvDetailedSiteName.text = site.name
         binding.tvDetailedSiteCategory.text = site.category
-        binding.tvDetailedSiteRating.text = site.rating?.let { "★ $it" } ?: "Rating unavailable"
+        binding.tvDetailedSiteRating.text = site.rating?.let {
+            getString(R.string.site_rating_format, it)
+        } ?: getString(R.string.rating_unavailable)
         binding.tvDetailedSiteDescription.text =
-            site.description ?: "No description available yet."
+            site.description ?: getString(R.string.no_description_available)
 
         val photoBytes = site.photoBytes
         if (photoBytes != null) {

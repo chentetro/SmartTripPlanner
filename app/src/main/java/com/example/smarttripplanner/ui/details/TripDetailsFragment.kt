@@ -68,7 +68,7 @@ class TripDetailsFragment : Fragment() {
             adapter = siteAdapter
         }
 
-        val dateFormatter = SimpleDateFormat("EEEE, MMM d, yyyy", Locale.getDefault())
+        val dateFormatter = SimpleDateFormat(getString(R.string.trip_date_format), Locale.getDefault())
 
         viewModel.setTripId(currentTripId)
 
@@ -79,9 +79,17 @@ class TripDetailsFragment : Fragment() {
             isFavorite = trip.isFavorite
             binding.tvDetailTripName.text = trip.tripName
             binding.tvDetailTripDate.text = dateFormatter.format(Date(trip.tripDate))
-            binding.tvDetailTripTimeRange.text = "${trip.totalStartTime} - ${trip.totalEndTime}"
-            binding.tvDetailTripMeta.text =
-                "Vibe: ${trip.vibe} • ${trip.participantsCount} participants • ${trip.maxDistance.toInt()} km radius"
+            binding.tvDetailTripTimeRange.text = getString(
+                R.string.trip_time_range_format,
+                trip.totalStartTime,
+                trip.totalEndTime
+            )
+            binding.tvDetailTripMeta.text = getString(
+                R.string.trip_details_meta_format,
+                trip.vibe,
+                trip.participantsCount,
+                trip.maxDistance.toInt()
+            )
 
             updateFavoriteButton(isFavorite)
         }
@@ -102,7 +110,11 @@ class TripDetailsFragment : Fragment() {
             when (state) {
                 TripDetailsEditState.Idle -> Unit
                 TripDetailsEditState.Saved -> {
-                    Toast.makeText(requireContext(), "Trip details updated", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.trip_details_updated),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     viewModel.resetEditState()
                 }
                 is TripDetailsEditState.Error -> {
@@ -119,18 +131,18 @@ class TripDetailsFragment : Fragment() {
             setPadding(24.dpToPx(), 8.dpToPx(), 24.dpToPx(), 0)
         }
 
-        val nameInput = createDialogEditText("Trip name", trip.tripName)
-        val startTimeInput = createDialogEditText("Start time", trip.totalStartTime)
-        val endTimeInput = createDialogEditText("End time", trip.totalEndTime)
+        val nameInput = createDialogEditText(getString(R.string.trip_name), trip.tripName)
+        val startTimeInput = createDialogEditText(getString(R.string.start_time), trip.totalStartTime)
+        val endTimeInput = createDialogEditText(getString(R.string.end_time), trip.totalEndTime)
 
         container.addView(nameInput)
         container.addView(startTimeInput)
         container.addView(endTimeInput)
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Edit trip details")
+            .setTitle(getString(R.string.edit_trip_details))
             .setView(container)
-            .setPositiveButton("Save") { _, _ ->
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
                 viewModel.updateTripDetails(
                     tripId = currentTripId,
                     name = nameInput.text?.toString().orEmpty(),
@@ -138,7 +150,7 @@ class TripDetailsFragment : Fragment() {
                     endTime = endTimeInput.text?.toString().orEmpty()
                 )
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -155,7 +167,11 @@ class TripDetailsFragment : Fragment() {
 
     private fun updateFavoriteButton(isFavorite: Boolean) {
         binding.btnAddToFavorites.text =
-            if (isFavorite) "Remove from Favorites" else "Add to Favorites"
+            if (isFavorite) {
+                getString(R.string.remove_from_favorites)
+            } else {
+                getString(R.string.add_to_favorites)
+            }
     }
     //להגדיר כאן שהADAPTER שלו זה SITEADAPTER
 

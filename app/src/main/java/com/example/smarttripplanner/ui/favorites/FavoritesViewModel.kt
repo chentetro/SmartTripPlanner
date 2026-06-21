@@ -1,6 +1,7 @@
 package com.example.smarttripplanner.ui.favorites
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import com.example.smarttripplanner.data.model.Trip
 import com.example.smarttripplanner.data.repository.TripRepository
@@ -12,5 +13,10 @@ class FavoritesViewModel @Inject constructor(
     tripRepository: TripRepository
 ) : ViewModel() {
 
-    val favoriteTrips: LiveData<List<Trip>> = tripRepository.getFavoriteTrips()
+    private val _favoriteTrips = MediatorLiveData<List<Trip>>().apply {
+        addSource(tripRepository.getFavoriteTrips()) { trips ->
+            value = trips
+        }
+    }
+    val favoriteTrips: LiveData<List<Trip>> = _favoriteTrips
 }

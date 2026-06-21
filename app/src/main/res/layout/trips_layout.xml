@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="My Trips"
+            android:text="@string/my_tripss"
             android:textColor="#FFFFFF"
             android:textSize="28sp"
             android:textStyle="bold" />
@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Tap a trip to view details"
+            android:text="@string/tap_a_trip_to_view_details"
             android:textColor="#D9FFFFFF"
             android:textSize="14sp" />
 
@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="24dp"
-        android:text="No trips yet.\nCreate your first trip from Home."
+        android:text="@string/no_trips_yet_ncreate_your_first_trip_from_home"
         android:textColor="#666666"
         android:textSize="16sp"
         android:visibility="gone"

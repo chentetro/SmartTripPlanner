@@ -44,15 +44,17 @@ class SiteAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(site: SavedSite) {
-            val orderPrefix = site.visitOrder?.let { "$it. " } ?: ""
-            binding.tvSiteOrderAndName.text = "$orderPrefix${site.name}"
+            val context = binding.root.context
+            binding.tvSiteOrderAndName.text = site.visitOrder?.let { visitOrder ->
+                context.getString(R.string.site_order_name_format, visitOrder, site.name)
+            } ?: site.name
             binding.tvSiteCategory.text = site.category
 
             if (site.rating.isNullOrBlank()) {
                 binding.tvSiteRating.visibility = View.GONE
             } else {
                 binding.tvSiteRating.visibility = View.VISIBLE
-                binding.tvSiteRating.text = "★ ${site.rating}"
+                binding.tvSiteRating.text = context.getString(R.string.site_rating_format, site.rating)
             }
 
             val photoBytes = site.photoBytes

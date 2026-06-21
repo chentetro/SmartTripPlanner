@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.smarttripplanner.R
 import com.example.smarttripplanner.data.model.Trip
 import com.example.smarttripplanner.databinding.ItemTripBinding
 import java.text.SimpleDateFormat
@@ -48,14 +49,26 @@ class TripAdapter(
         private val onTripClick: (Trip) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        private val dateFormatter = SimpleDateFormat("EEEE, MMM d, yyyy", Locale.getDefault())
-
         fun bind(trip: Trip) {
+            val context = binding.root.context
+            val dateFormatter = SimpleDateFormat(
+                context.getString(R.string.trip_date_format),
+                Locale.getDefault()
+            )
+
             binding.tvTripName.text = trip.tripName
             binding.tvTripDate.text = dateFormatter.format(Date(trip.tripDate))
-            binding.tvTripTimeRange.text = "${trip.totalStartTime} - ${trip.totalEndTime}"
-            binding.tvTripMeta.text =
-                "${trip.vibe} • ${trip.participantsCount} participants • ${trip.maxDistance.toInt()} km"
+            binding.tvTripTimeRange.text = context.getString(
+                R.string.trip_time_range_format,
+                trip.totalStartTime,
+                trip.totalEndTime
+            )
+            binding.tvTripMeta.text = context.getString(
+                R.string.trip_meta_format,
+                trip.vibe,
+                trip.participantsCount,
+                trip.maxDistance.toInt()
+            )
 
             binding.ivTripFavorite.visibility = if (trip.isFavorite) View.VISIBLE else View.GONE
 
